@@ -1,11 +1,13 @@
 package com.example.jaewonkim.todo_app
 
+import android.graphics.Paint
 import android.os.Bundle
 import android.support.design.widget.FloatingActionButton
 import android.support.v7.app.AlertDialog
 import android.support.v7.app.AppCompatActivity
 import android.view.View
 import android.widget.*
+import kotlinx.android.synthetic.main.activity_main.*
 
 class MainActivity : AppCompatActivity(), ItemRowListner {
     private var items: MutableList<ToDoItem> = mutableListOf()
@@ -20,6 +22,7 @@ class MainActivity : AppCompatActivity(), ItemRowListner {
         listView.adapter = MyCustomAdapter(this, items)
 
         fab.setOnClickListener { view ->
+            textView.visibility = View.INVISIBLE
             addNewItemDialog()
         }
     }
@@ -54,33 +57,47 @@ class MainActivity : AppCompatActivity(), ItemRowListner {
 
             dialog.dismiss()
 
-            Toast.makeText(this, "성공적으로 저장되었습니다.", Toast.LENGTH_SHORT).show()
+            Toast.makeText(this, "성공적으로 저장되었습니다.", Toast.LENGTH_LONG).show()
         }
 
         alert.show()
     }
 
     override fun modifyItemState(itemObjectId: Int, isDone: Boolean) {
-        val idx = itemObjectId
-        val currItem = items[idx]
+        val currItem = items[itemObjectId]
+        val listView = findViewById<ListView>(R.id.main_listview)
         currItem.done = isDone
+
+        var tTag = "title" + itemObjectId.toString()
+        var dTag = "description" + itemObjectId.toString()
+
+        var t = listView.findViewWithTag<TextView>(tTag)
+        var d = listView.findViewWithTag<TextView>(dTag)
+
+        if(items[itemObjectId].done == true) {
+            t.setPaintFlags(Paint.STRIKE_THRU_TEXT_FLAG)
+            d.setPaintFlags(Paint.STRIKE_THRU_TEXT_FLAG)
+        } else {
+            t.setPaintFlags(0)
+            d.setPaintFlags(0)
+        }
+        (listView.adapter as MyCustomAdapter).notifyDataSetChanged()
     }
+
     override fun modifyItemContent(itemObjectId: Int, itemTitle: String, itemDescription: String) {
         val editBtn = findViewById<ImageButton>(R.id.imageButton6) as ImageButton
+        println("I'm here")
 
-        editBtn.setOnClickListener { view ->
-            addEditItemDialog(editBtn)
-        }
+        addEditItemDialog(itemObjectId)
     }
+
     override fun onItemDelete(itemObjectId: Int) {
         val delBtn = findViewById<ImageButton>(R.id.imageButton5) as ImageButton
 
-        delBtn.setOnClickListener { view ->
-            confirmDelete(itemObjectId)
-        }
+        confirmDelete(itemObjectId)
     }
 
-    private fun addEditItemDialog(editBtn: ImageButton) {
+    private fun addEditItemDialog(itemObjectId: Int) {
         val alert = AlertDialog.Builder(this)
 
         val layout = LinearLayout(this)
@@ -90,8 +107,7 @@ class MainActivity : AppCompatActivity(), ItemRowListner {
         val itemEditTitle = EditText(this)
         val itemEditDescription = EditText(this)
 
-        val currId = editBtn.getTag() as Int
-        val currItem = items[currId]
+        val currItem = items[itemObjectId]
 
         itemEditTitle.setText(currItem.itemTitle)
         itemEditDescription.setText(currItem.itemDescription)
@@ -108,11 +124,11 @@ class MainActivity : AppCompatActivity(), ItemRowListner {
             currItem.itemDescription = itemEditDescription.text.toString()
             currItem.done = false
 
-            items[currId] = currItem
+            items[itemObjectId] = currItem
 
             dialog.dismiss()
 
-            Toast.makeText(this, "성공적으로 수정되었습니다.", Toast.LENGTH_SHORT).show()
+            Toast.makeText(this, "성공적으로 수정되었습니다.", Toast.LENGTH_LONG).show()
         }
 
         alert.show()
@@ -125,7 +141,7 @@ class MainActivity : AppCompatActivity(), ItemRowListner {
         alert.setMessage("삭제하시겠습니까?")
         alert.setPositiveButton("예") { dialog, which ->
             items.removeAt(itemObjectId)
-            Toast.makeText(this, "삭제되었습니다.", Toast.LENGTH_SHORT).show()
+            Toast.makeText(this, "삭제되었습니다.", Toast.LENGTH_LONG).show()
             dialog.dismiss()
             (listView.adapter as MyCustomAdapter).notifyDataSetChanged()
         }

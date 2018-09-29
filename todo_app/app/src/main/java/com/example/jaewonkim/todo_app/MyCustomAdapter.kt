@@ -19,40 +19,52 @@ class MyCustomAdapter(context: Context, private val items: MutableList<ToDoItem>
 
     override fun getView(position: Int, convertView: View?, parent: ViewGroup?): View {
         val layoutInflater = LayoutInflater.from(mContext)
-        val rowMain = layoutInflater.inflate(R.layout.main_row, parent, false)
 
-        val titleTextView = rowMain.findViewById<TextView>(R.id.title_listview)
+        val view: View
+        val vh: ListRowHolder
+        if(convertView == null) {
+            view = layoutInflater.inflate(R.layout.main_row, parent, false)
+            vh = ListRowHolder(view)
+            view.tag = vh
+        } else {
+            view = convertView
+            vh = view.tag as ListRowHolder
+        }
+
+        val titleTextView = view.findViewById<TextView>(R.id.title_listview)
         val idx = position + 1
         titleTextView.text = "#" + idx.toString() + " " + items.get(position).itemTitle
+        titleTextView.tag = "title" + position.toString()
 
-        val descriptionTextView = rowMain.findViewById<TextView>(R.id.description_listview)
+        val descriptionTextView = view.findViewById<TextView>(R.id.description_listview)
         descriptionTextView.text = items.get(position).itemDescription
+        descriptionTextView.tag = "description" + position.toString()
 
-        val editTextBtn = rowMain.findViewById<ImageButton>(R.id.imageButton6)
+        val editTextBtn = view.findViewById<ImageButton>(R.id.imageButton6)
         editTextBtn.tag = position
 
-        val delTextBtn = rowMain.findViewById<ImageButton>(R.id.imageButton5)
+        val delTextBtn = view.findViewById<ImageButton>(R.id.imageButton5)
         delTextBtn.tag = position
 
-        val checkbox = rowMain.findViewById<CheckBox>(R.id.checkBox)
+        val checkbox = view.findViewById<CheckBox>(R.id.checkBox)
         checkbox.tag = position
 
-        checkbox.setOnClickListener {
-            val idx = checkbox.getTag() as Int
+        vh.isDone.setOnClickListener {
+            val idx = vh.isDone.getTag() as Int
             rowListner.modifyItemState(idx, !items[idx].done!!)
         }
 
-        editTextBtn.setOnClickListener {
-            val idx = editTextBtn.getTag() as Int
+        vh.edit.setOnClickListener {
+            val idx = vh.edit.getTag() as Int
             rowListner.modifyItemContent(idx, items[idx].itemTitle.toString(), items[idx].itemDescription.toString())
         }
 
-        delTextBtn.setOnClickListener {
-            val idx = delTextBtn.getTag() as Int
+        vh.del.setOnClickListener {
+            val idx = vh.del.getTag() as Int
             rowListner.onItemDelete(idx)
         }
 
-        return rowMain
+        return view
     }
 
     override fun getItem(position: Int): Any {
@@ -65,5 +77,11 @@ class MyCustomAdapter(context: Context, private val items: MutableList<ToDoItem>
 
     override fun getCount(): Int {
         return items.size
+    }
+
+    private class ListRowHolder(row: View?) {
+        val isDone: CheckBox = row!!.findViewById<CheckBox>(R.id.checkBox) as CheckBox
+        val edit: ImageButton = row!!.findViewById<ImageButton>(R.id.imageButton6) as ImageButton
+        val del: ImageButton = row!!.findViewById<ImageButton>(R.id.imageButton5) as ImageButton
     }
 }
