@@ -9,7 +9,7 @@ import android.view.View
 import android.widget.*
 import kotlinx.android.synthetic.main.activity_main.*
 
-class MainActivity : AppCompatActivity(), ItemRowListner {
+class MainActivity : AppCompatActivity(), ItemRowListener {
     private var items: MutableList<ToDoItem> = mutableListOf()
 
     override fun onCreate(savedInstanceState: Bundle?) {

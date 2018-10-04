@@ -11,7 +11,7 @@ import android.widget.TextView
 
 class MyCustomAdapter(context: Context, private val items: MutableList<ToDoItem>): BaseAdapter() {
     private val mContext: Context
-    private var rowListner: ItemRowListner = context as ItemRowListner
+    private var rowListner: ItemRowListener = context as ItemRowListener
 
     init {
         mContext = context
